@@ -40,7 +40,7 @@ help:
 
 up:
 	docker-compose up -d
-	@echo "Services started. Kafka UI at http://localhost:8080"
+	@echo "Services started. Kafka UI at http://localhost:8081"
 
 down:
 	docker-compose down

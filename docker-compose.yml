@@ -1,7 +1,5 @@
 # Crickplay Local Development Stack
-# Usage: make up | docker-compose up -d
-
-version: "3.9"
+# Usage: make up | docker compose up -d
 
 services:
   # PostgreSQL Database

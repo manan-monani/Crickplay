@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
 from app.config import get_settings
+from app.db.session import close_db, init_db
 
 settings = get_settings()
 
@@ -19,8 +20,11 @@ async def lifespan(app: FastAPI):
     """Application lifespan events."""
     # Startup
     print("Starting Crickplay API...")
+    await init_db()
+    print("Database initialized.")
     yield
     # Shutdown
+    await close_db()
     print("Shutting down Crickplay API...")
 
 
@@ -60,10 +64,11 @@ async def health_check():
     return {"status": "healthy"}
 
 
-# TODO: Include routers
-# from app.routers import auth, matches, players, venues, ai_chat
-# app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
-# app.include_router(matches.router, prefix="/matches", tags=["Matches"])
-# app.include_router(players.router, prefix="/players", tags=["Players"])
-# app.include_router(venues.router, prefix="/venues", tags=["Venues"])
-# app.include_router(ai_chat.router, prefix="/ai", tags=["AI Chat"])
+# Include routers
+from app.routers import auth, matches, players, venues, ai_chat
+
+app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
+app.include_router(matches.router, prefix="/matches", tags=["Matches"])
+app.include_router(players.router, prefix="/players", tags=["Players"])
+app.include_router(venues.router, prefix="/venues", tags=["Venues"])
+app.include_router(ai_chat.router, prefix="/ai", tags=["AI Chat"])
