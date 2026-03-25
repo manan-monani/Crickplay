@@ -8,13 +8,13 @@
 
 | Status | Count |
 |--------|-------|
-| Done | 8 |
-| In Progress | 2 |
-| Todo | 6 |
+| Done | 16 |
+| In Progress | 0 |
+| Todo | 2 |
 | Backlog | 12 |
 
-**Last Updated:** 2026-03-25
-**Current Focus:** Phase 2 completion + Phase 3 start
+**Last Updated:** 2026-03-25 18:20
+**Current Focus:** Phase 5 (ML Pipeline) preparation
 
 ---
 
