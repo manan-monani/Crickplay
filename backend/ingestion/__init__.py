@@ -1,0 +1,1 @@
+"""Crickplay Kafka Ingestion Module"""
