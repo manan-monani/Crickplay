@@ -88,7 +88,7 @@
         "SUPABASE_URL": "${SUPABASE_URL}",
         "SUPABASE_KEY": "${SUPABASE_KEY}"
       },
-      "description": "Supabase database and auth operations"
+      "description": "Supabase database and auth operations (optional)"
     },
     "redis": {
       "command": "npx",
@@ -106,6 +106,23 @@
         "SENTRY_ORG": "${SENTRY_ORG}"
       },
       "description": "Sentry error tracking and monitoring"
+    },
+    "stripe": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-stripe", "--tools=all"],
+      "env": {
+        "STRIPE_SECRET_KEY": "${STRIPE_SECRET_KEY}"
+      },
+      "description": "Stripe payment operations for subscription billing"
+    },
+    "cloudflare": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/mcp-server-cloudflare"],
+      "env": {
+        "CLOUDFLARE_API_TOKEN": "${CLOUDFLARE_API_TOKEN}",
+        "CLOUDFLARE_ACCOUNT_ID": "${CLOUDFLARE_ACCOUNT_ID}"
+      },
+      "description": "Cloudflare Workers/D1 for edge deployment (optional)"
     }
   }
 }

@@ -8,137 +8,84 @@
 
 | Status | Count |
 |--------|-------|
-| Backlog | 0 |
+| Backlog | 6 |
 | Todo | 0 |
-| In Progress | 0 |
-| Done | 0 |
+| In Progress | 1 |
+| Done | 2 |
 
-**Last Updated:** [Date]
-**Current Focus:** [Current task or priority]
+**Last Updated:** 2026-03-25
+**Current Focus:** Phase 1 - Project Setup & Environment
 
 ---
 
 ## In Progress
 
-<!-- Tasks currently being worked on -->
-
-### [TASK-001] Example Task
+### [TASK-003] Set up complete project structure
 - **Priority:** P1
 - **Size:** M
-- **Started:** 2024-XX-XX
-- **Branch:** `feature/example`
-- **Description:** Brief description of the task
+- **Started:** 2026-03-25
+- **Branch:** `main`
+- **Description:** Create all necessary directories and files for Phase 1
 - **Progress:**
-  - [x] Subtask 1
-  - [ ] Subtask 2
-  - [ ] Subtask 3
-
----
-
-## Todo
-
-<!-- Tasks ready to be picked up -->
-
-<!--
-### [TASK-XXX] Task Title
-- **Priority:** P1/P2/P3
-- **Size:** S/M/L/XL
-- **Dependencies:** None | TASK-XXX
-- **Description:** What needs to be done
--->
-
----
-
-## Backlog
-
-<!-- Tasks identified but not yet ready -->
-
-<!--
-### [TASK-XXX] Task Title
-- **Priority:** P3
-- **Description:** Brief description
-- **Notes:** Any context or considerations
--->
-
----
-
-## Blocked
-
-<!-- Tasks that cannot proceed -->
-
-<!--
-### [TASK-XXX] Task Title
-- **Blocked By:** Reason
-- **Since:** Date
-- **Unblock Action:** What would unblock this
--->
+  - [x] Update architecture.md
+  - [x] Create Claude memory files
+  - [ ] Set up virtual environment
+  - [ ] Create requirements.txt
+  - [ ] Create docker-compose.yml
+  - [ ] Create Makefile
+  - [ ] Update .gitignore
 
 ---
 
 ## Done
 
-<!-- Completed tasks (keep recent 10, archive older) -->
+### [TASK-001] Update architecture.md
+- **Completed:** 2026-03-25
+- **Summary:** Updated system architecture with complete Crickplay design including medallion data architecture, tech stack, directory structure
 
-<!--
-### [TASK-XXX] Task Title ✓
-- **Completed:** 2024-XX-XX
-- **Branch:** `feature/xxx` (merged)
-- **Summary:** Brief summary of what was done
-- **Commits:** abc1234, def5678
--->
+### [TASK-002] Create Claude memory files
+- **Completed:** 2026-03-25
+- **Summary:** Created MEMORY.md, tech-stack.md, phase-checklist.md for persistent context
 
 ---
 
-## Archive
+## Backlog
 
-<!-- Link to archived tasks -->
-See `docs/archive/tasks-archive.md` for older completed tasks.
-
----
-
-## Task Templates
-
-### Feature Task
-```markdown
-### [TASK-XXX] Feature: [Name]
+### [TASK-004] Docker Compose Local Stack
 - **Priority:** P1
-- **Size:** L
-- **Dependencies:** None
-- **Description:** Implement [feature description]
-- **Acceptance Criteria:**
-  - [ ] Criterion 1
-  - [ ] Criterion 2
-- **Subtasks:**
-  - [ ] Design component
-  - [ ] Implement backend
-  - [ ] Add tests
-  - [ ] Documentation
-```
-
-### Bug Fix Task
-```markdown
-### [TASK-XXX] Fix: [Bug Description]
-- **Priority:** P0
-- **Size:** S
-- **Related Issue:** #123
-- **Description:** Fix [bug description]
-- **Steps to Reproduce:**
-  1. Step 1
-  2. Step 2
-- **Expected vs Actual:** What should happen vs what happens
-```
-
-### Refactor Task
-```markdown
-### [TASK-XXX] Refactor: [What]
-- **Priority:** P2
 - **Size:** M
-- **Description:** Refactor [description]
-- **Motivation:** Why this refactor is needed
-- **Scope:**
-  - [ ] File/component 1
-  - [ ] File/component 2
-```
+- **Description:** Create docker-compose.yml with postgres, redis, kafka, zookeeper, kafka-ui
+- **Dependencies:** TASK-003
+
+### [TASK-005] Pre-commit Hooks Setup
+- **Priority:** P2
+- **Size:** S
+- **Description:** Configure black, isort, prettier, eslint hooks
+- **Dependencies:** TASK-003
+
+### [TASK-006] GitHub Actions CI Pipeline
+- **Priority:** P2
+- **Size:** S
+- **Description:** Create .github/workflows/ci.yml skeleton
+- **Dependencies:** TASK-003
+
+### [TASK-007] Backend Environment Setup (uv/poetry)
+- **Priority:** P1
+- **Size:** M
+- **Description:** Set up Python virtual environment and dependency management
+- **Dependencies:** TASK-003
+
+### [TASK-008] Frontend Environment Setup (pnpm)
+- **Priority:** P1
+- **Size:** M
+- **Description:** Initialize Next.js 14 project with pnpm
+- **Dependencies:** TASK-003
+
+### [TASK-009] Cricsheet Data Download Script
+- **Priority:** P1
+- **Size:** S
+- **Description:** Create scripts/download_cricsheet.py
+- **Dependencies:** TASK-007as
 
 ---
 
