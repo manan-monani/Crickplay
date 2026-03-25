@@ -1,0 +1,152 @@
+# Gold Layer Schema — Dimensions and Facts
+# Tests ensure referential integrity, uniqueness, and data quality
+
+version: 2
+
+models:
+  # ==============================
+  # DIMENSION TABLES
+  # ==============================
+  - name: dim_player
+    description: "One row per unique player with career stats and role classification"
+    columns:
+      - name: player_sk
+        description: "Surrogate key for player dimension"
+        tests:
+          - unique
+          - not_null
+      - name: player_name
+        description: "Player full name"
+        tests:
+          - not_null
+      - name: player_role
+        description: "Classified role: Batter, Bowler, All-Rounder, Unknown"
+        tests:
+          - accepted_values:
+              values: ['Batter', 'Bowler', 'All-Rounder', 'Unknown']
+
+  - name: dim_venue
+    description: "One row per unique venue with pitch classification and aggregated stats"
+    columns:
+      - name: venue_sk
+        description: "Surrogate key for venue dimension"
+        tests:
+          - unique
+          - not_null
+      - name: stadium_name
+        description: "Stadium/ground name"
+        tests:
+          - unique
+          - not_null
+      - name: pitch_type
+        description: "Classified pitch: Batting, Bowling, Spin-friendly, Balanced"
+        tests:
+          - accepted_values:
+              values: ['Batting', 'Bowling', 'Spin-friendly', 'Balanced']
+
+  - name: dim_date
+    description: "Standard date dimension with cricket-specific attributes"
+    columns:
+      - name: date_key
+        description: "Date primary key"
+        tests:
+          - unique
+          - not_null
+      - name: year
+        tests:
+          - not_null
+      - name: is_weekend
+        tests:
+          - not_null
+
+  - name: dim_match_context
+    description: "Match-level contextual data: toss, tournament phase, conditions"
+    columns:
+      - name: match_context_sk
+        description: "Surrogate key for match context"
+        tests:
+          - unique
+          - not_null
+      - name: match_id
+        description: "Natural match identifier"
+        tests:
+          - unique
+          - not_null
+      - name: tournament_phase
+        description: "Stage of tournament"
+        tests:
+          - accepted_values:
+              values: ['Group Stage', 'Super Stage', 'Semi-final', 'Knockout', 'Final']
+
+  # ==============================
+  # FACT TABLES
+  # ==============================
+  - name: fact_delivery
+    description: "Most granular fact — one row per ball bowled"
+    columns:
+      - name: delivery_sk
+        description: "Surrogate key for delivery fact"
+        tests:
+          - unique
+          - not_null
+      - name: delivery_id
+        description: "Natural delivery identifier (match_innings_over_ball)"
+        tests:
+          - not_null
+      - name: match_id
+        tests:
+          - not_null
+      - name: batter_key
+        description: "FK to dim_player"
+        tests:
+          - relationships:
+              to: ref('dim_player')
+              field: player_sk
+      - name: bowler_key
+        description: "FK to dim_player"
+        tests:
+          - relationships:
+              to: ref('dim_player')
+              field: player_sk
+      - name: venue_key
+        description: "FK to dim_venue"
+        tests:
+          - relationships:
+              to: ref('dim_venue')
+              field: venue_sk
+      - name: batter_runs
+        tests:
+          - not_null
+      - name: total_runs
+        tests:
+          - not_null
+      - name: tenant_id
+        description: "Multi-tenancy isolation key"
+        tests:
+          - not_null
+
+  - name: fact_match_summary
+    description: "Aggregated match fact — one row per match"
+    columns:
+      - name: match_summary_sk
+        description: "Surrogate key for match summary"
+        tests:
+          - unique
+          - not_null
+      - name: match_id
+        tests:
+          - unique
+          - not_null
+      - name: match_context_sk
+        description: "FK to dim_match_context"
+        tests:
+          - relationships:
+              to: ref('dim_match_context')
+              field: match_context_sk
+      - name: first_innings_total
+        tests:
+          - not_null
+      - name: tenant_id
+        description: "Multi-tenancy isolation key"
+        tests:
+          - not_null
