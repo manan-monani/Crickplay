@@ -5,8 +5,8 @@
 ## Project Overview
 
 **Project Name:** Crickplay
-**Type:** [Define your project type - Web App / Mobile App / API / etc.]
-**Tech Stack:** [Define your tech stack]
+**Type:** [ predictive sports analytics platform / real-time sports data processing system / etc. ]
+**Tech Stack:** [mentioned in the implementation details]
 
 ---
 
