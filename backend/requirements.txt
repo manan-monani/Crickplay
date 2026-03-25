@@ -41,10 +41,10 @@ mlflow>=2.10.0
 # === Ray Serve (ML Serving) ===
 ray[serve]>=2.9.0
 
-# === GenAI Stack ===
-anthropic>=0.18.0
+# === GenAI Stack (Google Gemini) ===
+google-generativeai>=0.4.0
 langchain>=0.1.0
-langchain-anthropic>=0.1.0
+langchain-google-genai>=0.0.11
 langchain-community>=0.0.20
 langgraph>=0.0.20
 chromadb>=0.4.22
@@ -55,5 +55,7 @@ dbt-postgres>=1.7.0
 # === WebSocket ===
 websockets>=12.0
 
-# === Stripe Payments ===
-stripe>=8.0.0
+# === Data Download ===
+tqdm>=4.66.0
+aiofiles>=23.2.1
+zipfile36>=0.1.3

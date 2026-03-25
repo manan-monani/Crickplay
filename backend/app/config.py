@@ -25,7 +25,9 @@ class Settings(BaseSettings):
     secret_key: str = "change-me-in-production"
 
     # Database
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/crickplay"
+    database_url: str = (
+        "postgresql+asyncpg://postgres:postgres@localhost:5432/crickplay"
+    )
 
     # Redis
     redis_url: str = "redis://localhost:6379"
@@ -42,15 +44,11 @@ class Settings(BaseSettings):
     jwt_access_token_expire_minutes: int = 15
     jwt_refresh_token_expire_days: int = 7
 
-    # Anthropic (Claude AI)
-    anthropic_api_key: str = ""
-
-    # Stripe
-    stripe_secret_key: str = ""
-    stripe_webhook_secret: str = ""
+    # Google Gemini AI
+    gemini_api_key: str = ""
 
     # MLflow
-    mlflow_tracking_uri: str = "http://localhost:5000"
+    mlflow_tracking_uri: str = "http://localhost:5001"
     mlflow_experiment_name: str = "crickplay-win-probability"
 
     # Rate Limiting
