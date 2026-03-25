@@ -8,6 +8,7 @@
     )
 }}
 
+
 with deliveries as (
     select * from {{ ref('stg_deliveries') }}
 ),
@@ -27,11 +28,11 @@ match_summary as (
         min(match_winner) as match_winner,
         min(win_margin) as win_margin,
 
-        -- Calculate total deliveries
-        count(*) as total_deliveries,
+-- Calculate total deliveries
+count(*) as total_deliveries,
 
-        -- Calculate overs
-        max(case when innings_number = 1 then over_number + 1 else 0 end) as innings_1_overs,
+-- Calculate overs
+max(case when innings_number = 1 then over_number + 1 else 0 end) as innings_1_overs,
         max(case when innings_number = 2 then over_number + 1 else 0 end) as innings_2_overs,
 
         min(ingested_at) as first_ingested_at,
@@ -45,12 +46,11 @@ with_teams as (
     select
         ms.*,
 
-        -- Extract teams from first delivery of match
-        d.teams_array->>0 as team_1,
-        d.teams_array->>1 as team_2,
+-- Extract teams from first delivery of match
+d.teams_array ->> 0 as team_1, d.teams_array ->> 1 as team_2,
 
-        -- First innings batting team
-        first_value(d.batting_team) over (
+-- First innings batting team
+first_value(d.batting_team) over (
             partition by ms.match_id
             order by d.innings_number, d.over_number, d.ball_number
         ) as first_innings_team
@@ -77,22 +77,19 @@ select
     match_winner,
     win_margin,
 
-    -- Derived fields
-    case
-        when match_winner = team_1 then team_1
-        when match_winner = team_2 then team_2
-        else null
-    end as winner,
-
-    case
-        when match_winner = first_innings_team then true
-        else false
-    end as first_innings_team_won,
-
-    total_deliveries,
-    innings_1_overs,
-    innings_2_overs,
-    first_ingested_at,
-    last_ingested_at
-
+-- Derived fields
+case
+    when match_winner = team_1 then team_1
+    when match_winner = team_2 then team_2
+    else null
+end as winner,
+case
+    when match_winner = first_innings_team then true
+    else false
+end as first_innings_team_won,
+total_deliveries,
+innings_1_overs,
+innings_2_overs,
+first_ingested_at,
+last_ingested_at
 from with_teams
