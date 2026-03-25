@@ -1,0 +1,28 @@
+# Bronze Layer Sources
+# Raw data from Kafka consumer
+
+version: 2
+
+sources:
+  - name: bronze
+    description: "Raw data ingested from Kafka"
+    database: crickplay
+    schema: public
+    tables:
+      - name: bronze_deliveries
+        description: "Raw delivery events from Cricsheet data"
+        columns:
+          - name: id
+            description: "Auto-increment primary key"
+          - name: match_id
+            description: "Cricsheet match identifier"
+          - name: raw_payload
+            description: "Original JSON payload from Kafka"
+          - name: kafka_topic
+            description: "Source Kafka topic"
+          - name: kafka_partition
+            description: "Kafka partition number"
+          - name: kafka_offset
+            description: "Kafka message offset"
+          - name: ingested_at
+            description: "Timestamp when record was ingested"

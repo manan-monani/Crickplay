@@ -1,0 +1,91 @@
+# Silver Layer Model Documentation
+
+version: 2
+
+models:
+  - name: stg_deliveries
+    description: "Flattened and typed delivery events from Bronze layer"
+    columns:
+      - name: delivery_id
+        description: "Unique identifier for each delivery"
+        tests:
+          - unique
+          - not_null
+
+      - name: match_id
+        description: "Cricsheet match identifier"
+        tests:
+          - not_null
+
+      - name: match_date
+        description: "Date of the match (YYYY-MM-DD)"
+
+      - name: innings_number
+        description: "Innings number (1 or 2)"
+        tests:
+          - accepted_values:
+              values: [1, 2]
+
+      - name: over_number
+        description: "Over number (0-19 for T20)"
+
+      - name: ball_number
+        description: "Ball number within the over"
+
+      - name: batter
+        description: "Name of the batter facing the delivery"
+        tests:
+          - not_null
+
+      - name: bowler
+        description: "Name of the bowler"
+        tests:
+          - not_null
+
+      - name: batter_runs
+        description: "Runs scored by the batter"
+
+      - name: extra_runs
+        description: "Extra runs (wides, noballs, byes, leg byes)"
+
+      - name: total_runs
+        description: "Total runs off the delivery"
+
+      - name: is_wicket
+        description: "Whether a wicket fell on this delivery"
+
+      - name: is_legal_delivery
+        description: "Whether this was a legal delivery (not a wide or no-ball)"
+
+  - name: stg_match_info
+    description: "Match-level summary information"
+    columns:
+      - name: match_id
+        description: "Unique match identifier"
+        tests:
+          - unique
+          - not_null
+
+      - name: match_date
+        description: "Date of the match"
+        tests:
+          - not_null
+
+      - name: venue
+        description: "Venue where match was played"
+
+      - name: team_1
+        description: "First team in the match"
+        tests:
+          - not_null
+
+      - name: team_2
+        description: "Second team in the match"
+        tests:
+          - not_null
+
+      - name: match_winner
+        description: "Team that won the match"
+
+      - name: first_innings_team_won
+        description: "Whether the team batting first won"
