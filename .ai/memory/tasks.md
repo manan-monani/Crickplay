@@ -8,32 +8,45 @@
 
 | Status | Count |
 |--------|-------|
-| Backlog | 6 |
-| Todo | 0 |
-| In Progress | 1 |
-| Done | 2 |
+| Done | 8 |
+| In Progress | 2 |
+| Todo | 6 |
+| Backlog | 12 |
 
 **Last Updated:** 2026-03-25
-**Current Focus:** Phase 1 - Project Setup & Environment
+**Current Focus:** Phase 2 completion + Phase 3 start
 
 ---
 
 ## In Progress
 
-### [TASK-003] Set up complete project structure
+### [TASK-010] Gold Layer Dimension Tables
 - **Priority:** P1
-- **Size:** M
+- **Size:** L
+- **Phase:** 3
 - **Started:** 2026-03-25
-- **Branch:** `main`
-- **Description:** Create all necessary directories and files for Phase 1
+- **Branch:** `develop`
+- **Description:** Create dbt Gold layer dimension models
 - **Progress:**
-  - [x] Update architecture.md
-  - [x] Create Claude memory files
-  - [ ] Set up virtual environment
-  - [ ] Create requirements.txt
-  - [ ] Create docker-compose.yml
-  - [ ] Create Makefile
-  - [ ] Update .gitignore
+  - [ ] dim_player.sql (with SCD Type 2)
+  - [ ] dim_venue.sql (with pitch data seeds)
+  - [ ] dim_date.sql (date spine)
+  - [ ] dim_match_context.sql (toss, phase, weather)
+  - [ ] schema.yml with tests
+
+### [TASK-011] Gold Layer Fact Tables
+- **Priority:** P1
+- **Size:** L
+- **Phase:** 3
+- **Started:** 2026-03-25
+- **Branch:** `develop`
+- **Description:** Create dbt Gold layer fact models
+- **Progress:**
+  - [ ] fact_delivery.sql (one row per ball, incremental)
+  - [ ] fact_match_summary.sql (aggregated per match)
+  - [ ] Add tenant_id column
+  - [ ] schema.yml with tests
+  - [ ] Verify aggregation integrity
 
 ---
 
@@ -41,51 +54,109 @@
 
 ### [TASK-001] Update architecture.md
 - **Completed:** 2026-03-25
-- **Summary:** Updated system architecture with complete Crickplay design including medallion data architecture, tech stack, directory structure
+- **Summary:** Full system architecture with medallion data architecture, tech stack, directory structure
 
 ### [TASK-002] Create Claude memory files
 - **Completed:** 2026-03-25
-- **Summary:** Created MEMORY.md, tech-stack.md, phase-checklist.md for persistent context
+- **Summary:** Created memory files for persistent context across sessions
+
+### [TASK-003] Set up complete project structure
+- **Completed:** 2026-03-25
+- **Summary:** Monorepo with /backend, /frontend, /infra, /data, /docs + all config files
+
+### [TASK-004] Docker Compose Local Stack
+- **Completed:** 2026-03-25
+- **Summary:** docker-compose.yml with postgres, redis, kafka, zookeeper, kafka-ui, mlflow
+
+### [TASK-005] Cricsheet Parser & Data Download
+- **Completed:** 2026-03-25
+- **Summary:** CricsheetParser class with generator pattern + download_cricsheet.py script
+
+### [TASK-006] Kafka Producer & Consumer
+- **Completed:** 2026-03-25
+- **Summary:** CricketDeliveryProducer (batch/live modes) + BronzeLayerConsumer (→ PostgreSQL JSONB)
+
+### [TASK-007] Silver Layer dbt Models
+- **Completed:** 2026-03-25
+- **Summary:** stg_deliveries.sql and stg_match_info.sql with schema tests
+
+### [TASK-008] FastAPI App Skeleton
+- **Completed:** 2026-03-25
+- **Summary:** FastAPI with config, health endpoint, CORS, GZip middleware
+
+---
+
+## Todo
+
+### [TASK-012] Multi-Tenancy: Row-Level Security
+- **Priority:** P0
+- **Size:** M
+- **Phase:** 3
+- **Description:** Add tenant_id to Gold tables + PostgreSQL RLS policies + FastAPI middleware
+- **Dependencies:** TASK-010, TASK-011
+- **Critical Note:** Must be done BEFORE loading Gold layer data
+
+### [TASK-013] FastAPI Auth System
+- **Priority:** P1
+- **Size:** L
+- **Phase:** 4
+- **Description:** JWT auth (register, login, refresh), RBAC (fan/professional/enterprise/admin), rate limiting (slowapi)
+- **Dependencies:** TASK-012
+
+### [TASK-014] Core API Endpoints
+- **Priority:** P1
+- **Size:** L
+- **Phase:** 4
+- **Description:** /matches, /matches/{id}/win-probability, /players/{id}/stats, /venues/{id}/analytics, /tournaments/{id}/leaderboard
+- **Dependencies:** TASK-013
+
+### [TASK-015] Database Session & Tenant Utilities
+- **Priority:** P1
+- **Size:** M
+- **Phase:** 4
+- **Description:** Async session factory, tenant context injection per request
+- **Dependencies:** TASK-012
+
+### [TASK-016] Alembic Initial Migration
+- **Priority:** P1
+- **Size:** S 
+- **Phase:** 4
+- **Description:** Users, tenants, subscriptions tables + properly configure alembic.ini
+- **Dependencies:** TASK-012
+
+### [TASK-017] Virtual Environment Verification
+- **Priority:** P1
+- **Size:** S
+- **Phase:** 1
+- **Description:** Ensure backend venv has all required packages installed and working
 
 ---
 
 ## Backlog
 
-### [TASK-004] Docker Compose Local Stack
-- **Priority:** P1
-- **Size:** M
-- **Description:** Create docker-compose.yml with postgres, redis, kafka, zookeeper, kafka-ui
-- **Dependencies:** TASK-003
+### Phase 5 — ML Pipeline
+- [TASK-020] Feature Engineering Pipeline (25-dim vector)
+- [TASK-021] XGBoost Model Training + Optuna HPO
+- [TASK-022] SHAP Integration + Real-time Inference
+- [TASK-023] Additional ML Models (regressor, clustering, association rules)
 
-### [TASK-005] Pre-commit Hooks Setup
-- **Priority:** P2
-- **Size:** S
-- **Description:** Configure black, isort, prettier, eslint hooks
-- **Dependencies:** TASK-003
+### Phase 6 — GenAI
+- [TASK-030] Text-to-SQL Agent Tool
+- [TASK-031] Vector Search Tool (ChromaDB)
+- [TASK-032] LangGraph Agentic Router
+- [TASK-033] Dynamic Narrative Generation
 
-### [TASK-006] GitHub Actions CI Pipeline
-- **Priority:** P2
-- **Size:** S
-- **Description:** Create .github/workflows/ci.yml skeleton
-- **Dependencies:** TASK-003
+### Phase 7 — Frontend
+- [TASK-040] Next.js App Setup + Shared Components
+- [TASK-041] Coach Dashboard
+- [TASK-042] Bettor & Broadcaster Dashboards
+- [TASK-043] AI Chat Interface
 
-### [TASK-007] Backend Environment Setup (uv/poetry)
-- **Priority:** P1
-- **Size:** M
-- **Description:** Set up Python virtual environment and dependency management
-- **Dependencies:** TASK-003
-
-### [TASK-008] Frontend Environment Setup (pnpm)
-- **Priority:** P1
-- **Size:** M
-- **Description:** Initialize Next.js 14 project with pnpm
-- **Dependencies:** TASK-003
-
-### [TASK-009] Cricsheet Data Download Script
-- **Priority:** P1
-- **Size:** S
-- **Description:** Create scripts/download_cricsheet.py
-- **Dependencies:** TASK-007as
+### Phase 8 — Deployment
+- [TASK-050] Dockerize All Services
+- [TASK-051] Kubernetes Deployment (AWS EKS)
+- [TASK-052] Stripe Payment Integration
+- [TASK-053] Security Hardening & Monitoring
 
 ---
 
