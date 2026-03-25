@@ -147,7 +147,9 @@ class CricsheetParser:
         match_date = info.get("dates", ["unknown"])[0]
         season = info.get("season", "unknown")
         event = info.get("event", {})
-        event_name = event.get("name", "unknown") if isinstance(event, dict) else str(event)
+        event_name = (
+            event.get("name", "unknown") if isinstance(event, dict) else str(event)
+        )
         venue = info.get("venue", "unknown")
         teams = info.get("teams", [])
         toss = info.get("toss", {})
@@ -176,7 +178,11 @@ class CricsheetParser:
 
         for innings_idx, innings in enumerate(innings_list, start=1):
             batting_team = innings.get("team", "unknown")
-            bowling_team = [t for t in teams if t != batting_team][0] if len(teams) == 2 else "unknown"
+            bowling_team = (
+                [t for t in teams if t != batting_team][0]
+                if len(teams) == 2
+                else "unknown"
+            )
 
             overs = innings.get("overs", [])
 

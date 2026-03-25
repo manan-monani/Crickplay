@@ -240,7 +240,9 @@ class BronzeLayerConsumer:
             self.engine.dispose()
             print("Database connection closed")
 
-        print(f"Final stats: {self._message_count} processed, {self._error_count} errors")
+        print(
+            f"Final stats: {self._message_count} processed, {self._error_count} errors"
+        )
 
 
 def run_bronze_consumer():

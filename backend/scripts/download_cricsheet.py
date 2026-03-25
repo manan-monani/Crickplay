@@ -115,7 +115,7 @@ if __name__ == "__main__":
         nargs="+",
         default=["t20i"],
         choices=list(CRICSHEET_URLS.keys()),
-        help="Datasets to download (default: t20i)"
+        help="Datasets to download (default: t20i)",
     )
 
     args = parser.parse_args()
