@@ -1,18 +1,59 @@
-fastapi
-uvicorn
-sqlalchemy
-alembic
-asyncpg
-pydantic
-pydantic-settings
-python-jose[cryptography]
-passlib[bcrypt]
-httpx
-kafka-python
-confluent-kafka
-psycopg2-binary
-python-dotenv
-pytest
-black
-isort
-dbt-postgres
+# Crickplay Backend Requirements
+# Python 3.11+
+
+# === Core Framework ===
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# === Database ===
+sqlalchemy[asyncio]>=2.0.25
+asyncpg>=0.29.0
+psycopg2-binary>=2.9.9
+alembic>=1.13.1
+redis>=5.0.0
+
+# === Authentication ===
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+slowapi>=0.1.9
+
+# === Kafka Streaming ===
+confluent-kafka>=2.3.0
+
+# === HTTP Client ===
+httpx>=0.26.0
+requests>=2.31.0
+
+# === Environment ===
+python-dotenv>=1.0.0
+
+# === ML Dependencies ===
+pandas>=2.1.0
+numpy>=1.26.0
+scikit-learn>=1.4.0
+xgboost>=2.0.3
+shap>=0.44.0
+optuna>=3.5.0
+mlflow>=2.10.0
+
+# === Ray Serve (ML Serving) ===
+ray[serve]>=2.9.0
+
+# === GenAI Stack ===
+anthropic>=0.18.0
+langchain>=0.1.0
+langchain-anthropic>=0.1.0
+langchain-community>=0.0.20
+langgraph>=0.0.20
+chromadb>=0.4.22
+
+# === dbt (Data Transformation) ===
+dbt-postgres>=1.7.0
+
+# === WebSocket ===
+websockets>=12.0
+
+# === Stripe Payments ===
+stripe>=8.0.0

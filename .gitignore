@@ -1,17 +1,59 @@
-# Environment
+# ============================================
+# SECRETS AND SENSITIVE DATA
+# CRITICAL: Never commit these files!
+# ============================================
+
+# Environment files
 .env
-.env.*
+.env.local
+.env.*.local
+.env.development
+.env.staging
+.env.production
+*.env
 !.env.example
 
-# Python
+# Secret keys and credentials
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets.json
+secrets.yaml
+secrets.yml
+credentials.json
+credentials.yaml
+service-account*.json
+*-credentials.json
+*.secret
+.secret*
+
+# API keys (common patterns)
+*_api_key*
+*_secret_key*
+
+# ============================================
+# PYTHON
+# ============================================
+
+# Byte-compiled / optimized
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
 .Python
 backend/.venv/
 backend/venv/
 backend/env/
+
+# Distribution / packaging
 build/
 develop-eggs/
 dist/
@@ -30,39 +72,228 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# Node/Frontend
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Translations
+*.mo
+*.pot
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# ============================================
+# NODE.JS / FRONTEND
+# ============================================
+
 frontend/node_modules/
-frontend/dist/
-frontend/build/
 frontend/.next/
 frontend/out/
+frontend/build/
+frontend/dist/
+
+node_modules/
+.next/
+out/
+
+# Debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+lerna-debug.log*
 
-# OS Files
+# TypeScript cache
+*.tsbuildinfo
+
+# Vercel
+.vercel
+
+# ============================================
+# DATA FILES (Large/Sensitive)
+# ============================================
+
+data/raw/
+data/bronze/
+data/silver/
+data/gold/
+data/models/
+data/documents/
+
+# Large data files
+*.csv
+*.parquet
+*.avro
+*.arrow
+*.feather
+!tests/**/*.csv
+!backend/dbt/seeds/*.csv
+
+# JSON data (allow specific configs)
+*.json
+!package.json
+!tsconfig.json
+!*.config.json
+!tests/**/*.json
+!backend/dbt/**/*.json
+!.vscode/*.json
+!.github/**/*.json
+!scripts/**/*.json
+
+# Pickle files (may contain model weights)
+*.pkl
+*.pickle
+
+# HDF5 / ML model files
+*.h5
+*.hdf5
+*.pb
+*.onnx
+*.pt
+*.pth
+*.safetensors
+
+# MLflow artifacts
+mlruns/
+mlartifacts/
+
+# ============================================
+# OPERATING SYSTEM
+# ============================================
+
+# macOS
 .DS_Store
 .DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
-ehthumbs.db
-Thumbs.db
 
-# IDEs
-.idea/
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# ============================================
+# IDES AND EDITORS
+# ============================================
+
+# VSCode
 .vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 !.vscode/mcp.json
+
+# JetBrains (PyCharm, WebStorm, etc.)
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Vim
 *.swp
 *.swo
+*.swn
 
-# Data
-data/raw/
-data/bronze/
-data/silver/
-data/gold/
-*.csv
-*.json
-!tests/**/*.json
-!scripts/**/*.json
+# Emacs
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# Sublime Text
+*.sublime-workspace
+*.sublime-project
+
+# ============================================
+# DOCKER
+# ============================================
+
+# Docker volumes data
+docker-data/
+
+# ============================================
+# INFRASTRUCTURE
+# ============================================
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+*.tfvars
+!*.tfvars.example
+
+# Kubernetes secrets
+*-secret.yaml
+*-secrets.yaml
+!*-secret.yaml.example
+
+# ============================================
+# LOGS AND TEMPORARY FILES
+# ============================================
+
+logs/
+*.log
+*.tmp
+*.temp
+.temp/
+tmp/
+temp/
+
+# ============================================
+# MISCELLANEOUS
+# ============================================
+
+# Backup files
+*.bak
+*.backup
+
+# Archives (except for downloaded data)
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# Local development
+.local/
+local/
+scratch/
+sandbox/
