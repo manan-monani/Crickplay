@@ -297,3 +297,30 @@ temp/
 local/
 scratch/
 sandbox/
+
+# ============================================
+# TERRAFORM
+# ============================================
+# State files (contain sensitive data)
+*.tfstate
+*.tfstate.backup
+*.tfstate.lock.info
+.terraform/
+.terraform.lock.hcl
+
+# Variable files with secrets
+terraform.tfvars
+*.auto.tfvars
+
+# Generated SSH keys
+infra/terraform/*.pem
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
