@@ -1,1 +1,0 @@
-"""Crickplay Backend Tests"""

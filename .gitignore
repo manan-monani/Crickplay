@@ -143,7 +143,7 @@ lerna-debug.log*
 # ============================================
 # DATA FILES (Large/Sensitive)
 # ============================================
-
+data/
 data/raw/
 data/bronze/
 data/silver/
