@@ -160,7 +160,7 @@ data/documents/
 !tests/**/*.csv
 !backend/dbt/seeds/*.csv
 
-# JSON data (allow specific configs)
+# JSON data (allow specific configs and raw data)
 *.json
 !package.json
 !tsconfig.json
@@ -170,6 +170,7 @@ data/documents/
 !.vscode/*.json
 !.github/**/*.json
 !scripts/**/*.json
+!Data/**/*.json
 
 # Pickle files (may contain model weights)
 *.pkl
