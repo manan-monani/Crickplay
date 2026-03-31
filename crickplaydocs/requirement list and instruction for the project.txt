@@ -1,0 +1,20 @@
+ok so first of all what we want to do now is that I want to make the setup for the agent , so that the agent should properly and efficiently work for the project. I have already made the template repo for all the agentic work that is mentioned below , and for that I want the following steps. I want you to write or create the necessary files that the agent can do the following things more productively , if you find that you need to make some new files or any new things then you are allowed to do so , and in the last tell me that how to use this whole structure or thing for more productive development through agent .
+
+1. first of all that version controlling should be done with the proper industry standards and rules , the agent should itself do the version controlling for the project it should do proper commits to the git , push it to the remote repository , the agent should do proper branching if it thinks like that this part of the work or the implementation can be changed in the future , it should automatically keep record of all the implementation of the code in the project repository and also keep the track of the past work in the repo so that i not have to do the same task again , the most important thing that the agent should do the proper version controlling is that if in future we need to go back or revert some feature or some part of the code then we can go back and do the task changes according to our comfort , and branching is for independent implementation of any of the feature . 
+
+2. second thing is that we want to keep all the documentation and the artifacts of the project and for all of its feature that how they are implemented and what is the logic is used behind them and why they are build , also in that documentation i want to keep the record of the tasks that what task are already implemented in the project , what task are currently in the implementation stage and what task are needed to be implemented in future so that the implementation flow of the project is not blocked . basically i want that the agent should keep its own to-do list for the permanent basis so that it come to know that what to do next wisely .
+
+if the agent determines that it need some more mcp tools or the skills set then 
+
+3. context 7 mcp for the knowledge of the codebase and library . notion or the slack MCP for the documentation and to-do tasks control and retrieval 
+
+4. database mcp for having fully control on the database .
+
+5. terminal and the file system MCP for getting access of the terminal and code directory . 
+
+6. docker mcp for containerised application .
+
+if you find that any other MCP's are needed to be added then do add them , i have agreed with you don't wait for my to tell you .
+
+
+ok i know the basics of the hooks that it triggeres automatically when certain task or trigger is happend , but i don't know that where i need all of them so for my these requirement implement the proper triggers so that my whole workflow can be executed more efficiently .

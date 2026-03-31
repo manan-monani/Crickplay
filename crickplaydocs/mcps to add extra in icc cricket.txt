@@ -1,0 +1,8 @@
+mcps to add extra in icc cricket :
+
+@modelcontextprotocol/server-sequential-thinking 
+@modelcontextprotocol/server-memory 
+@modelcontextprotocol/server-brave-search
+@benborla29/mcp-server-MySQL
+dvc-mcp
+@modelcontextprotocol/server-slack
