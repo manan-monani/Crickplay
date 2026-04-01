@@ -2,11 +2,31 @@
 Silver Layer - ELT Transformer
 
 Transforms raw Bronze layer data into cleansed, conformed tabular format.
-Handles:
-- JSON flattening
-- Player identity standardization
-- Cricket-specific null handling
-- Change Data Capture (CDC) for incremental processing
+
+Key Features:
+- JSON flattening: Unnest nested delivery arrays into relational format
+- Player identity standardization: Map to canonical Cricsheet IDs
+- Cricket-specific null handling: extras=null means legal delivery
+- Data type casting: String→INT for runs, ISO 8601 for dates
+- Change Data Capture (CDC): Only process new/modified data
+
+CDC Integration:
+    The transformer uses the centralized CDC system (src/medallion/cdc.py)
+    for tracking processed files and preventing duplicate records:
+    
+    ```python
+    from src.medallion.cdc import CDCManager
+    
+    transformer = SilverTransformer(use_enhanced_cdc=True)
+    files, records = transformer.run_incremental()
+    ```
+
+Architecture:
+    Bronze (Parquet) → Silver Transformer → Silver (Parquet)
+    
+    - File-level CDC: Track which Bronze files have been transformed
+    - Record-level dedup: Hash-based duplicate detection
+    - Watermark tracking: Timestamp-based incremental queries
 """
 
 import json
@@ -28,6 +48,13 @@ try:
 except ImportError:
     pa = None
     pq = None
+
+# Import enhanced CDC system
+try:
+    from src.medallion.cdc import CDCManager, CDCConfig
+    CDC_AVAILABLE = True
+except ImportError:
+    CDC_AVAILABLE = False
 
 
 @dataclass
@@ -318,12 +345,45 @@ class SilverTransformer:
     1. Extract: Read new data from Bronze layer
     2. Load: Load into processing pipeline
     3. Transform: Flatten, cleanse, standardize
+
+    CDC Integration:
+        Supports both legacy CDC (ChangeDataCapture class) and enhanced CDC
+        (CDCManager from src/medallion/cdc.py). Use `use_enhanced_cdc=True`
+        for production deployments.
     """
 
-    def __init__(self, config: Optional[SilverConfig] = None):
+    def __init__(
+        self,
+        config: Optional[SilverConfig] = None,
+        use_enhanced_cdc: bool = False,
+    ):
         self.config = config or SilverConfig()
         self.flattener = DeliveryFlattener()
-        self.cdc = ChangeDataCapture(self.config.checkpoint_file)
+        
+        # Choose CDC implementation
+        self._use_enhanced_cdc = use_enhanced_cdc and CDC_AVAILABLE
+        
+        if self._use_enhanced_cdc:
+            # Use enhanced CDC with record-level deduplication
+            cdc_config = CDCConfig(
+                checkpoint_dir="src/storage/lakehouse/cdc/silver",
+                enable_file_tracking=True,
+                enable_record_dedup=True,
+                enable_watermarks=True,
+            )
+            self._cdc_manager = CDCManager(cdc_config)
+            self.cdc = None  # Disabled legacy CDC
+        else:
+            # Use legacy CDC (file-level only)
+            self.cdc = ChangeDataCapture(self.config.checkpoint_file)
+            self._cdc_manager = None
+
+        # Processing statistics
+        self._stats = {
+            "files_processed": 0,
+            "records_transformed": 0,
+            "duplicates_skipped": 0,
+        }
 
         # Ensure output directory exists
         os.makedirs(self.config.silver_path, exist_ok=True)
@@ -339,7 +399,16 @@ class SilverTransformer:
 
     def list_new_files(self) -> List[str]:
         """List Bronze files not yet processed (CDC)."""
-        return [f for f in self.list_bronze_files() if not self.cdc.is_processed(f)]
+        if self._use_enhanced_cdc:
+            # Use enhanced CDC file tracker
+            return self._cdc_manager.get_pending_files(
+                self.config.bronze_path, "*.parquet"
+            ) + self._cdc_manager.get_pending_files(
+                self.config.bronze_path, "*.json"
+            )
+        else:
+            # Use legacy CDC
+            return [f for f in self.list_bronze_files() if not self.cdc.is_processed(f)]
 
     def read_bronze_file(self, file_path: str) -> List[Dict]:
         """Read a Bronze layer file."""
@@ -366,18 +435,44 @@ class SilverTransformer:
 
         raise ValueError(f"Unsupported format: {file_path}")
 
-    def transform_file(self, file_path: str) -> List[Dict]:
-        """Transform a single Bronze file to Silver format."""
+    def transform_file(self, file_path: str, deduplicate: bool = True) -> List[Dict]:
+        """
+        Transform a single Bronze file to Silver format.
+        
+        Args:
+            file_path: Path to Bronze file
+            deduplicate: If True, skip duplicate records (requires enhanced CDC)
+            
+        Returns:
+            List of transformed records
+        """
         raw_records = self.read_bronze_file(file_path)
 
         transformed = []
+        duplicates = 0
+        
         for record in raw_records:
             try:
+                # Check for duplicate (enhanced CDC only)
+                if deduplicate and self._use_enhanced_cdc:
+                    if self._cdc_manager.is_duplicate(record):
+                        duplicates += 1
+                        continue
+                
                 flat = self.flattener.flatten_delivery(record)
                 transformed.append(flat)
+                
+                # Mark record as seen (enhanced CDC only)
+                if self._use_enhanced_cdc:
+                    self._cdc_manager.mark_seen(record)
+                    
             except Exception as e:
                 print(f"[Silver] Error transforming record: {e}")
                 continue
+        
+        self._stats["duplicates_skipped"] += duplicates
+        if duplicates > 0:
+            print(f"[Silver] Skipped {duplicates} duplicate records")
 
         return transformed
 
@@ -438,6 +533,9 @@ class SilverTransformer:
         """
         Run incremental ELT (process only new Bronze files).
 
+        Uses CDC to track processed files and avoid reprocessing.
+        With enhanced CDC, also deduplicates records.
+
         Returns:
             Tuple of (files_processed, records_transformed)
         """
@@ -454,24 +552,40 @@ class SilverTransformer:
 
         for file_path in new_files:
             try:
-                transformed = self.transform_file(file_path)
+                transformed = self.transform_file(file_path, deduplicate=True)
                 all_transformed.extend(transformed)
                 total_records += len(transformed)
 
-                self.cdc.mark_processed(file_path)
+                # Mark file as processed
+                if self._use_enhanced_cdc:
+                    self._cdc_manager.mark_file_processed(file_path)
+                else:
+                    self.cdc.mark_processed(file_path)
+                    
                 print(f"[Silver] Processed: {file_path} ({len(transformed)} records)")
 
             except Exception as e:
                 print(f"[Silver] Error processing {file_path}: {e}")
                 continue
 
+        # Update stats
+        self._stats["files_processed"] += len(new_files)
+        self._stats["records_transformed"] += total_records
+
         # Write output
         if all_transformed:
             output_path = self.write_silver_output(all_transformed, "incremental")
             print(f"[Silver] Output written to: {output_path}")
+            
+            # Update watermark (enhanced CDC only)
+            if self._use_enhanced_cdc:
+                self._cdc_manager.update_watermark("silver_output", output_path)
 
         # Commit checkpoint
-        self.cdc.commit()
+        if self._use_enhanced_cdc:
+            self._cdc_manager.commit()
+        else:
+            self.cdc.commit()
 
         return len(new_files), total_records
 
@@ -479,16 +593,21 @@ class SilverTransformer:
         """
         Run full ELT (reprocess all Bronze files).
 
+        Resets CDC state and reprocesses everything.
+
         Returns:
             Tuple of (files_processed, records_transformed)
         """
         # Reset CDC checkpoint
-        self.cdc.reset()
+        if self._use_enhanced_cdc:
+            self._cdc_manager.reset()
+        else:
+            self.cdc.reset()
 
         return self.run_incremental()
 
     def get_statistics(self) -> Dict:
-        """Get Silver layer statistics."""
+        """Get Silver layer statistics including CDC metrics."""
         silver_files = []
         for root, dirs, filenames in os.walk(self.config.silver_path):
             for filename in filenames:
@@ -497,14 +616,61 @@ class SilverTransformer:
 
         total_size = sum(os.path.getsize(f) for f in silver_files)
 
-        return {
+        stats = {
             "total_files": len(silver_files),
             "total_size_bytes": total_size,
             "total_size_mb": round(total_size / (1024 * 1024), 2),
             "bronze_files_total": len(self.list_bronze_files()),
             "bronze_files_pending": len(self.list_new_files()),
-            "storage_path": self.config.silver_path,
+            # Session stats
+            "session_files_processed": self._stats["files_processed"],
+            "session_records_transformed": self._stats["records_transformed"],
+            "session_duplicates_skipped": self._stats["duplicates_skipped"],
         }
+        
+        # Add CDC-specific stats
+        if self._use_enhanced_cdc:
+            cdc_stats = self._cdc_manager.get_stats()
+            stats["cdc_mode"] = "enhanced"
+            stats["cdc_files_tracked"] = cdc_stats.get("files_tracked", 0)
+            stats["cdc_records_deduped"] = cdc_stats.get("records_seen", 0)
+        else:
+            stats["cdc_mode"] = "legacy"
+            
+        return stats
+
+    def transform_record(self, raw_record: Dict, deduplicate: bool = True) -> Optional[Dict]:
+        """
+        Transform a single raw record to Silver format (for orchestrator integration).
+        
+        This method is designed for real-time/streaming processing where records
+        are processed individually rather than in batch files.
+        
+        Args:
+            raw_record: Raw message from Kafka/Bronze layer
+            deduplicate: If True, check for and skip duplicate records (enhanced CDC)
+            
+        Returns:
+            Flattened, cleansed Silver record, or None if transformation fails or duplicate
+        """
+        try:
+            # Check for duplicate (enhanced CDC only)
+            if deduplicate and self._use_enhanced_cdc:
+                if self._cdc_manager.is_duplicate(raw_record):
+                    self._stats["duplicates_skipped"] += 1
+                    return None
+            
+            flat = self.flattener.flatten_delivery(raw_record)
+            
+            # Mark as seen (enhanced CDC only)
+            if self._use_enhanced_cdc:
+                self._cdc_manager.mark_seen(raw_record)
+                
+            return flat
+            
+        except Exception as e:
+            print(f"[Silver] Error transforming record: {e}")
+            return None
 
 
 def main():
@@ -536,6 +702,11 @@ def main():
         default="parquet",
         help="Output format",
     )
+    parser.add_argument(
+        "--enhanced-cdc",
+        action="store_true",
+        help="Use enhanced CDC with record-level deduplication",
+    )
 
     args = parser.parse_args()
 
@@ -545,7 +716,9 @@ def main():
         output_format=args.format,
     )
 
-    transformer = SilverTransformer(config)
+    transformer = SilverTransformer(config, use_enhanced_cdc=args.enhanced_cdc)
+    
+    print(f"[Silver] CDC Mode: {'enhanced' if transformer._use_enhanced_cdc else 'legacy'}")
 
     if args.mode == "incremental":
         files, records = transformer.run_incremental()
@@ -562,7 +735,10 @@ def main():
             print(f"  {key}: {value}")
 
     elif args.mode == "reset":
-        transformer.cdc.reset()
+        if transformer._use_enhanced_cdc:
+            transformer._cdc_manager.reset()
+        else:
+            transformer.cdc.reset()
         print("[Silver] CDC checkpoint reset - next run will reprocess all files")
 
 

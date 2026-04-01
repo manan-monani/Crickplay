@@ -259,6 +259,22 @@ class BronzeKafkaSink:
         ):
             self.flush_batch()
 
+    def process_single_message(self, message: Dict) -> None:
+        """
+        Process a single message immediately (for orchestrator integration).
+        
+        This method adds the message to the batch and flushes if needed.
+        Unlike process_message, this is designed for external orchestrator use.
+        """
+        self.batch.add(message)
+        self.messages_processed += 1
+        
+        # Auto-flush when batch is ready
+        if self.batch.should_flush(
+            self.config.batch_size, self.config.batch_timeout_seconds
+        ):
+            self.flush_batch()
+
     def run(self, max_messages: Optional[int] = None) -> None:
         """
         Run the Bronze sink continuously.

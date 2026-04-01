@@ -52,6 +52,32 @@ class GoldConfig:
 
 
 @dataclass
+class DimDate:
+    """Date dimension for time-based analysis (date spine)."""
+    
+    date_key: str  # Primary key (YYYY-MM-DD format)
+    full_date: str
+    year: int
+    month: int
+    day: int
+    day_of_week: int  # 0=Monday, 6=Sunday
+    day_name: str  # Monday, Tuesday, etc.
+    is_weekend: bool
+    quarter: int
+    week_of_year: int
+    
+    # Tournament-specific
+    tournament_week_number: Optional[int] = None
+    tournament_phase: Optional[str] = None  # Group, Super8, Semifinal, Final
+    
+    created_at: str = ""
+    
+    def __post_init__(self):
+        if not self.created_at:
+            self.created_at = datetime.utcnow().isoformat()
+
+
+@dataclass
 class DimPlayer:
     """Player dimension record."""
 
@@ -174,6 +200,12 @@ class FactDelivery:
     # Wicket details (denormalized for query performance)
     wicket_kind: Optional[str] = None
 
+    # ML/Analytics fields
+    win_probability_delta: float = 0.0  # Change in win probability after this delivery
+
+    # Multi-tenancy support (RLS)
+    tenant_id: Optional[str] = None
+
     # Timestamps
     event_timestamp: str = ""
 
@@ -222,6 +254,9 @@ class FactMatchSummary:
     run_rate_second: float = 0.0
     win_margin: Optional[str] = None
 
+    # Multi-tenancy support (RLS)
+    tenant_id: Optional[str] = None
+
     created_at: str = ""
 
 
@@ -243,6 +278,7 @@ class StarSchemaBuilder:
         self._players: Dict[str, DimPlayer] = {}
         self._venues: Dict[str, DimVenue] = {}
         self._match_contexts: Dict[str, DimMatchContext] = {}
+        self._dates: Dict[str, DimDate] = {}
 
         # Fact accumulator
         self._deliveries: List[FactDelivery] = []
@@ -251,6 +287,7 @@ class StarSchemaBuilder:
         # Ensure output directories
         os.makedirs(os.path.join(self.config.gold_path, "dim_player"), exist_ok=True)
         os.makedirs(os.path.join(self.config.gold_path, "dim_venue"), exist_ok=True)
+        os.makedirs(os.path.join(self.config.gold_path, "dim_date"), exist_ok=True)
         os.makedirs(
             os.path.join(self.config.gold_path, "dim_match_context"), exist_ok=True
         )
@@ -328,6 +365,35 @@ class StarSchemaBuilder:
             )
 
         return self._match_contexts[match_id]
+
+    def ensure_date(self, date_str: str) -> DimDate:
+        """Ensure date exists in dimension table (date spine)."""
+        if not date_str:
+            date_str = datetime.utcnow().strftime("%Y-%m-%d")
+        
+        date_key = date_str[:10]  # YYYY-MM-DD
+        
+        if date_key not in self._dates:
+            try:
+                dt = datetime.strptime(date_key, "%Y-%m-%d")
+            except ValueError:
+                dt = datetime.utcnow()
+                date_key = dt.strftime("%Y-%m-%d")
+            
+            self._dates[date_key] = DimDate(
+                date_key=date_key,
+                full_date=dt.strftime("%B %d, %Y"),
+                year=dt.year,
+                month=dt.month,
+                day=dt.day,
+                day_of_week=dt.weekday(),
+                day_name=dt.strftime("%A"),
+                is_weekend=dt.weekday() >= 5,
+                quarter=(dt.month - 1) // 3 + 1,
+                week_of_year=dt.isocalendar()[1],
+            )
+        
+        return self._dates[date_key]
 
     def process_silver_record(self, record: Dict) -> None:
         """Process a single Silver layer record into Gold layer."""
