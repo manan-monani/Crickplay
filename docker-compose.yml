@@ -1,6 +1,7 @@
 version: "3.8"
 
 services:
+  # Kafka Infrastructure
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
     environment:
@@ -8,6 +9,8 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - 22181:2181
+    networks:
+      - crickplay-network
 
   kafka:
     image: confluentinc/cp-kafka:7.4.0
@@ -22,3 +25,53 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - crickplay-network
+
+  # Database Services (Phase 4)
+  postgres:
+    image: postgres:16-alpine
+    container_name: crickplay-postgres
+    environment:
+      POSTGRES_USER: crickplay_user
+      POSTGRES_PASSWORD: crickplay_password
+      POSTGRES_DB: crickplay_db
+      POSTGRES_INITDB_ARGS: "-E UTF8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init_db:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crickplay_user -d crickplay_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - crickplay-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: crickplay-redis
+    command: redis-server --appendonly yes --requirepass crickplay_redis_password
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - crickplay-network
+
+networks:
+  crickplay-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
